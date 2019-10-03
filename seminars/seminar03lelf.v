@@ -21,6 +21,7 @@ apply: ex_intro. split=> //. eassumption.
 Qed.
 
 
+
 Lemma exist_conj_commute A (P Q : A -> Prop) :
   (exists x, P x /\ Q x) -> (exists x, P x) /\ (exists x, Q x).
 Proof.
@@ -129,10 +130,6 @@ Qed.
 
 End BooleanLogic.
 
-(* Definition NMM n m := n - m + m == maxn n m. *)
-(* QuickChick NMM. *)
-
-
 Section Arithmetics.
 
 Lemma addnCB m n : m + (n - m) = m - n + n.
@@ -151,38 +148,37 @@ move=> ??; exact: addnBC.
 Qed.
 
 Lemma subn_sqr m n : m ^ 2 - n ^ 2 = (m - n) * (m + n).
-Proof.
+Proof. exact: subn_sqr.
+Restart.
 by rewrite -!mulnn mulnBl !mulnDr subnDA mulnC addnK.
 Qed.
 
-(* Lemma leqT n m p : n <= m -> m <= p -> n <= p. *)
-(* exact: leq_trans. *)
-(* Qed. *)
 
-Search _ (_(_<=_) -> _(_<=_) -> _(_<=_)).
+Search _ (_ = _ -> _ = _).
 
 Lemma leq_sub_add n m p : n - m <= n + p.
 Proof.
-   Search _ right_id.
-   have: n <= n+p by apply leq_addr.
-   have: n-m <= n by apply leq_subr.
-   apply: leqT.
+have: n <= n+p by apply leq_addr.
+have: n-m <= n by apply leq_subr.
+apply: leq_trans.
+Restart.
+have: n-m <= n <= n+p by rewrite leq_addr leq_subr.
+move/andP => []; exact: leq_trans.
 Qed.
 
 (* prove by induction *)
 Lemma odd_exp m n : odd (m ^ n) = (n == 0) || odd m.
-Proof.
-Admitted.
+Proof. exact: odd_exp.
+
+Restart.
+elim: n => // n; rewrite expnS odd_mul => ->; exact: orKb.
+
+Restart.
+elim: n => // n In; rewrite expnS odd_mul In orbC; case odd; done.
+Qed.
 
 End Arithmetics.
 
-
-(* Goal forall t f, (t->f)->f. *)
-(* move=> t f. apply. *)
-
-Goal forall t f, ((t -> f) -> f) -> t.
-move=> t f tft.
-apply: tft.
 
 
 
@@ -195,11 +191,20 @@ Lemma const_eq A B (x y : A) :
   @const A B x = const y -> x = y.
 Abort.
 
+Check fun x _ => x : forall A B, A->B->A.
+
+Definition fun1 (a _ : bool) := a.
+Definition fun2 (a _ : bool) := ~~ ~~a.
+
+
 Lemma no_const_eq A B (x y : A) :
   ~(@const A B x = const y -> x = y).
 Proof.
 rewrite/const.
 move=> H.
-Locate "@^~".
+Abort.
+
+
+
 
 End Misc.
