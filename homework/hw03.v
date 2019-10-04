@@ -2,7 +2,7 @@ From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat div.
 Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
-
+From Hammer Require Import Hammer.
 
 Section Classical_reasoning.
 
@@ -29,18 +29,41 @@ Implicit Types x y : A * B.
 
 Lemma prod_inj x y :
   x = y <-> (x.1, x.2) = (y.1, y.2).
-Proof. by case: x; case: y. Qed.
+Proof.
+by case: x; case: y.
+  *** Restart.
+split; first by move->.
+case. case: x; case: y => ???? /= -> ->. done.
+Qed.
 
 End Misc.
 
 
 
+From QuickChick Require Import QuickChick.
+Require Import Lia.
+
+
+Definition divn_ltn_mono n m k := andb (andb (n < m) ((k %| m))) (~~ (k==0)) ==> (n %/ k < m %/ k).
+QuickChick divn_ltn_mono.
+
+
 Section Arithmetics.
+
+
+Lemma leq_addr' m n p : m <= n -> m <= n + p.
+Proof. 
+move/leq_trans. move => ->//. apply: leq_addr.
+Qed.
+
 
 Lemma min_plus_r  n m p  :
   minn n m = n -> minn n (m + p) = n.
 Proof.
-Admitted.
+move/minn_idPl=> H. apply/minn_idPl. move: H.
+exact: leq_addr'.
+Qed.
+
 
 Lemma min_plus_minus m n p :
   minn n m + minn (n - m) p = minn n (m + p).
@@ -53,8 +76,7 @@ Fixpoint zero (n : nat) : nat :=
 
 Lemma zero_returns_zero n :
   zero n = 0.
-Proof.
-Admitted.
+Proof. by elim: n. Qed.
 
 (**
 Claim: every amount of postage that is at least 12 cents can be made
@@ -62,10 +84,23 @@ Claim: every amount of postage that is at least 12 cents can be made
 (** Hint: no need to use induction here *)
 Lemma stamps n : 12 <= n -> exists s4 s5, s4 * 4 + s5 * 5 = n.
 Proof.
+exists (n %/ 4 - n %% 4), (n %% 4).
+rewrite mulnBl. 
+have X: n %/ 4 * 4 + n %% 4 = n by admit.
+
+rewrite -addnABC.
+rewrite -mulnBr /=. simpl. subSnn muln1. done.
+
+have: 3 <= n %/ 4. change (3 <= n%/4) with (12%/4 <= n %/ 4). by apply leq_div2r.
+
+admit.
+
+rewrite [_ * 5]mulnS. apply: leq_addl.
+
 Admitted.
 
-End Arithmetics.
 
+End Arithmetics.
 
 (* ======================================== *)
 
@@ -122,7 +157,7 @@ Definition epic (f : A -> B) :=
 
 Lemma surj_epic f : surjective f -> epic f.
 Proof.
-Admitted.
+  rewrite/surjective/epic.
 
 Lemma epic_surj f : epic f -> surjective f.
   (** Why is this not provable? *)
