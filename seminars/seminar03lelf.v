@@ -151,10 +151,10 @@ Lemma subn_sqr m n : m ^ 2 - n ^ 2 = (m - n) * (m + n).
 Proof. exact: subn_sqr.
 Restart.
 by rewrite -!mulnn mulnBl !mulnDr subnDA mulnC addnK.
+Restart.
+by rewrite mulnBl !mulnDr addnC mulnC subnDl.
 Qed.
 
-
-Search _ (_ = _ -> _ = _).
 
 Lemma leq_sub_add n m p : n - m <= n + p.
 Proof.
