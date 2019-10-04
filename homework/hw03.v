@@ -34,7 +34,17 @@ by case: x; case: y.
   *** Restart.
 split; first by move->.
 case. case: x; case: y => ???? /= -> ->. done.
+Restart.
+
+by move: x y => [??] [??].
+Restart.
+by case x,y.
+Restart.
+by case: x; case: y.
 Qed.
+
+(* split=> [-> //|]. *)
+
 
 End Misc.
 
