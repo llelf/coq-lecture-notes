@@ -182,14 +182,21 @@ A m : nat
 
  *)
 
+
+elim: m n=> [|m IHm] n; first by rewrite mul1n addn0.
+rewrite addSnnS IHm /=.
+by rewrite mulnDl mulnDr addnAC -addnA addnC.
+
+------ Restart.
+
 elim: m n=> [|m IHm] [//|n]; try by rewrite ?muln0 !addn0 ?mul1n ?muln1.
 rewrite addSn /= IHm addnS IHm /= -!plusE -!multE; lia.
 
+------ Restart.
+elim: m n=> [|m IHm] [//|n]; rewrite ?muln0 ?addn0 ?mul1n ?muln1 //.
 
 --------Restart.
-elim: m n=> [|m IHm] [//|n] .
-- by rewrite addn0 mul1n. 
-- by rewrite muln0 !addn0 muln1.
+elim: m n=> [|m IHm] [//|n]; first [rewrite addn0 mul1n | rewrite muln0 !addn0 muln1].
 rewrite addSn /= IHm addnS IHm /=.
 rewrite -!plusE -!multE; lia.
 
