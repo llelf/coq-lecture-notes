@@ -27,6 +27,30 @@ Section Misc.
 Variables A B : Type.
 Implicit Types x y : A * B.
 
+
+
+Lemma pair_eqE (Aeq Beq: eqType) (p1 p2 : Aeq * Beq) :
+  (p1 == p2) = (p1.1 == p2.1) && (p1.2 == p2.2).
+Proof.
+case: p1 p2 => [a b] [c d] /=. apply/idP/idP.
+by move=>/eqP [] -> ->; rewrite !eqxx.
+by move=>/andP[] /eqP -> /eqP ->.
+
+  *** Restart.
+case Eq: (p1==p2).
+move/eqP: Eq.
+move->. symmetry. apply/andP. done. done.
+
+  *** Restart.
+by case Eq: (p1==p2).
+
+  *** Restart.
+done.
+Qed.
+
+
+
+
 Lemma prod_inj x y :
   x = y <-> (x.1, x.2) = (y.1, y.2).
 Proof.
