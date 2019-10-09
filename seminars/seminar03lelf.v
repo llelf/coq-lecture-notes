@@ -10,15 +10,20 @@ Set Bullet Behavior "None".
 
 Section IntLogic.
 
+
+
 (* Frobenius rule: existential quantifiers and conjunctions commute *)
 Lemma frobenius A (P : A -> Prop) Q :
   (exists x, Q /\ P x) <-> Q /\ (exists x, P x).
 split.
 case=> ? [q ph]. split=> //.
 - exact: ex_intro ph .
-move=> [? [??]].
-apply: ex_intro. split=> //. eassumption.
+move=> [q [a Pa]].
+by exists a.
+(* apply: ex_intro.  split; eassumption. *)
 Qed.
+
+
 
 
 
@@ -56,15 +61,19 @@ assert (Sep := conj Et Ef).
 apply H in Sep.
 destruct Sep as [x].
 now destruct x.
-
-Restart.
-
+----Restart.
 move=> H.
 have Et: exists x:bool,  x by exists true.
 have Ef: exists x:bool, ~x by exists false.
 have Sep:= conj Et Ef.
 move/H: Sep => {H}.
 by case=> [x]; case: x; case.
+---- Restart.
+move=> H.
+case: (H bool id not).
+by split; [exists true | exists false].
+move=> b.
+by case.
 Qed.
 
 
