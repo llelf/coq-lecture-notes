@@ -11,6 +11,11 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
+From Hammer Require Import Hammer Reconstr.
+From QuickChick Require Import QuickChick.
+Set Bullet Behavior "None".
+
+
 Fixpoint sum (l : seq nat) : nat :=
   if l is (x :: xs) then x + sum xs
   else 0.
@@ -25,13 +30,18 @@ Definition sum_iter (l : seq nat) : nat :=
 Lemma sum_iter'_correct l x0 :
   sum_iter' l x0 = x0 + sum l.
 Proof.
-Admitted.
+
+elim: l x0 => [|a l]. move=>x0. by rewrite addn0.
+move=> H. simpl.
+move=> x0. rewrite H. by rewrite [a+x0]addnC addnA.
+
+Qed.
 
 Theorem sum_iter_correct l :
   sum_iter l = sum l.
 Proof.
-Admitted.
-
+exact: sum_iter'_correct.
+Qed.
 
 (** Continuation-passing style
     https://en.wikipedia.org/wiki/Continuation-passing_style
@@ -46,12 +56,17 @@ Definition sum_cont (l : seq nat) : nat :=
 Lemma sum_cont'_correct A l (k : nat -> A) :
   sum_cont' l k = k (sum l).
 Proof.
-Admitted.
+elim: l k => // a l I k. exact: I.
+Qed.
+
+
+
 
 Theorem sum_cont_correct l :
   sum_cont l = sum l.
 Proof.
-Admitted.
+exact: sum_cont'_correct.
+Qed.
 
 Fixpoint rev_rec {A : Type} (xs : seq A) : seq A :=
   if xs is (x::xs') then
@@ -61,12 +76,16 @@ Fixpoint rev_rec {A : Type} (xs : seq A) : seq A :=
 Lemma rev_correct A (l1 l2 : seq A) :
   catrev l1 l2 = rev_rec l1 ++ l2.
 Proof.
-Admitted.
+elim: l1 l2 => //= a l1 I l2. by rewrite I -catA cat1s.
+Qed.
 
 Theorem rev_iter_correct A (l : seq A) :
   rev l = rev_rec l.
 Proof.
-Admitted.
+rewrite/rev.
+rewrite (rev_correct _ [::]).
+by rewrite cats0.
+Qed.
 
 Fixpoint map_iter' {A B}
     (f : A -> B) (l : seq A) (acc : seq B) : seq B :=
@@ -75,10 +94,12 @@ Fixpoint map_iter' {A B}
 
 Definition map_iter {A B} (f : A -> B) l := map_iter' f l [::].
 
+
 Lemma map_iter'_correct A B (f : A -> B) l1 l2 :
   map_iter' f l1 l2 = rev l2 ++ (map f l1).
 Proof.
-Admitted.
+elim: l1 l2 => [|a l1] I. by rewrite cats0.
+move=> l0. rewrite /= I /=. rewrite rev_cons -cats1. 
 
 Theorem map_iter_correct A B (f : A -> B) l :
   map_iter f l = map f l.
