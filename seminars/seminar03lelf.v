@@ -83,7 +83,7 @@ Lemma curry_dep A (P : A -> Prop) Q :
   ((exists x, P x) -> Q) -> (forall x, P x -> Q).
 Proof. move=> f x px. exact: (f (ex_intro _ x px)).
 Restart.
-intros. apply X. exists x. done.
+by move=> f x px; apply: f; exists x.
 Qed.
 
 Definition not_forall_exists :=
@@ -135,6 +135,8 @@ Lemma mostowski_equiv_even_odd a n :
   mostowski_equiv a n = a || odd n.
 Proof.
 elim: n; case: a => //= => n -> //; exact: eqbF_neg.
+   *** Restart.
+elim: n=> [|n /= ->]. case: a=> //; rewrite eqbF_neg.
 Qed.
 
 End BooleanLogic.
