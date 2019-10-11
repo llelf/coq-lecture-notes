@@ -99,12 +99,16 @@ Lemma map_iter'_correct A B (f : A -> B) l1 l2 :
   map_iter' f l1 l2 = rev l2 ++ (map f l1).
 Proof.
 elim: l1 l2 => [|a l1] I. by rewrite cats0.
-move=> l0. rewrite /= I /=. rewrite rev_cons -cats1. 
+move=> l0. rewrite /= I /=.
+by rewrite rev_cons cat_rcons.
+Qed.
+
 
 Theorem map_iter_correct A B (f : A -> B) l :
   map_iter f l = map f l.
 Proof.
-Admitted.
+exact: map_iter'_correct.
+Qed.
 
 Inductive expr : Type :=
 | Const of nat
@@ -127,12 +131,16 @@ Definition eval_expr_iter e := eval_expr_iter' e 0.
 Lemma eval_expr_iter'_correct e acc :
   eval_expr_iter' e acc = acc + eval_expr e.
 Proof.
-Admitted.
+elim: e acc => [e acc|e I e0 I' acc0]; first by rewrite addnC.
+by rewrite /= I I' addnA.
+Qed.
+
 
 Theorem eval_expr_iter_correct e :
   eval_expr_iter e = eval_expr e.
 Proof.
-Admitted.
+exact: eval_expr_iter'_correct.
+Qed.
 
 Fixpoint eval_expr_cont' {A} (e : expr) (k : nat -> A) : A :=
   match e with
@@ -147,12 +155,17 @@ Definition eval_expr_cont (e : expr) : nat :=
 Lemma eval_expr_cont'_correct A e (k : nat -> A) :
   eval_expr_cont' e k = k (eval_expr e).
 Proof.
-Admitted.
+elim: e k => // e I e0 I' k /=.
+rewrite I' I.
+done.
+Qed.
+
 
 Theorem eval_expr_cont_correct e :
   eval_expr_cont e = eval_expr e.
 Proof.
-Admitted.
+exact: eval_expr_cont'_correct.
+Qed.
 
 Inductive instr := Push (n : nat) | Add.
 
@@ -181,14 +194,24 @@ Fixpoint compile (e : expr) : prog :=
 Lemma run_append p1 p2 s :
   run (p1 ++ p2) s = run p2 (run p1 s).
 Proof.
-Admitted.
+elim: p1 s => // a p1 I s.
+by rewrite cat_cons /= I.
+Qed.
+
 
 Lemma compile_correct_generalized e s :
   run (compile e) s = (eval_expr e) :: s.
 Proof.
-Admitted.
+elim: e s => // e I e0 I' s.
+by rewrite !run_append I' I.
+Qed.
+
+
 
 Theorem compile_correct e :
   run (compile e) [:: ] = [:: eval_expr e].
 Proof.
-Admitted.
+exact: compile_correct_generalized.
+Qed.
+
+
