@@ -123,7 +123,7 @@ rewrite mulnBl.
 have X: n %/ 4 * 4 + n %% 4 = n by admit.
 
 rewrite -addnABC.
-rewrite -mulnBr /=. simpl. subSnn muln1. done.
+rewrite -mulnBr /=. simpl. rewrite subSnn muln1. done.
 
 have: 3 <= n %/ 4. change (3 <= n%/4) with (12%/4 <= n %/ 4). by apply leq_div2r.
 
@@ -131,7 +131,12 @@ admit.
 
 rewrite [_ * 5]mulnS. apply: leq_addl.
 
-Admitted.
+Restart.
+
+move=> /leq_div2r leq12n; exists (n %/4 - n %% 4), (n %% 4).
+rewrite mulnBl -addnABC -?mulnBr ?muln1 ?leq_mul -?divn_eq //.
+by rewrite (leq_trans _ (leq12n 4)) // -ltnS ltn_pmod.
+Qed.
 
 
 End Arithmetics.
