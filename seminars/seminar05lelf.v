@@ -95,9 +95,36 @@ Compute ncons 3 0 [:: 1].
 Section MoreInductionExercises.
 
 (** Implement a recursive function performing integer division by 2 *)
-Fixpoint div2 (n : nat) : nat. Admitted.
+Fixpoint div2 (n : nat) : nat :=
+  if n is n.+2 then (div2 n).+1 else 0.
+
+
+Check erefl : div2 42 = 21.
+Check erefl : div2 41 = 20.
+
 (* You might want to uncomment the following: *)
-(* Arguments div2 : simpl nomatch. *)
+Arguments div2 : simpl nomatch.
+
+
+
+From mathcomp Require Import eqtype.
+
+
+
+Definition nat_ind2'' (P : nat -> Prop) :
+  P 0 ->
+  P 1 ->
+  (forall n, P n -> P n.+2) ->
+  forall n, P n
+ :=
+  fun p0 p1 step => fix loop n :=
+    match n with
+    | n'.+2 => step n' (loop n')
+    | 1 => p1
+    | 0 => p0
+    end.
+
+
 
 Lemma nat_ind2' (P : nat -> Prop) :
   P 0 ->
@@ -105,7 +132,39 @@ Lemma nat_ind2' (P : nat -> Prop) :
   (forall n, P n -> P n.+2) ->
   forall n, P n.
 Proof.
-Admitted.
+intros.
+enough (P n /\ P (S n)) by easy.
+induction n.
+- easy.
+destruct IHn; split.
+- assumption. 
+- now apply H1.
+*********** Restart.
+move=> p0 p1 step; fix nat_ind2' 1.
+case=> [|[|n]]; [ exact: p0 | exact: p1 | exact: step (nat_ind2' n) ].
+*********** Restart.
+move=> p0 p1 step; fix nat_ind2' 1.
+case=> [|[|n]]; [ exact: p0 | exact: p1 | apply: step; exact: nat_ind2' ].
+*********** Restart.
+move=> p0 p1 step n.
+suff: P n /\ P n.+1 by case.
+elim: n=> // n [IHn1 IHn2].
+split=> //.
+by apply: step.
+*********** Restart.
+move=> ? ? step n.
+suffices: P n /\ P n.+1 by case.
+elim: n => // ? [].
+split => //.
+by apply: step.
+*********** Restart.
+move=> ? ? step n.
+suff: P n /\ P n.+1 by case.
+by elim: n=> // ? [ /step ].
+Qed.
+
+
+
 
 Lemma div2_le n : div2 n <= n.
 Proof.
