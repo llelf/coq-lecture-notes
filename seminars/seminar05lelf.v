@@ -168,12 +168,14 @@ Qed.
 
 Lemma div2_le n : div2 n <= n.
 Proof.
-Admitted.
+elim/nat_ind2': n => //= n I. exact: leqW.
+Qed.
 
 Lemma div2_correct n :
   div2 n = n./2.
 Proof.
-Admitted.
+elim/nat_ind2': n => //= n I. exact: eq_S.
+Qed.
 
 
 
