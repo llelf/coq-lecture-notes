@@ -67,28 +67,23 @@ by rewrite nth_ncons addKn ifN // -leqNgt leq_addr.
 Qed.
 
 
-Search _ (  ?b) ( (if ?b then _ else _) = _ ).
-
-(* rewrite addnK. *)
-
-(* have: forall x, x + i < x = false. *)
-(* move=> x. rewrite/leq subSn addnC. rewrite addnK. done. exact: leq_addl. *)
 
 
-
-(* have: forall x, x + i < x = false. *)
-(* by move=> x; rewrite -{2}[x]addn0 ltn_add2l.  *)
-
-
+Goal forall x y, x + y < x = false.
+Proof.
+move=> x y.
+by rewrite ltnNge leq_addr.
+Undo.
+by rewrite -{2}[x]addn0 ltn_add2l.
+Undo.
+rewrite/leq subSn addnC. rewrite addnK. done. exact: leq_addl.
+Qed.
 
 
 
 End LeftPad.
 
 Compute ncons 3 0 [:: 1].
-
-
-
 
 
 
