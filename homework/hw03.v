@@ -3,6 +3,7 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 From Hammer Require Import Hammer Reconstr.
+Require Import Utf8.
 
 
 Section Classical_reasoning.
@@ -13,8 +14,7 @@ Variable DNE : forall A : Prop, ~ ~ A -> A.
 
 
 Theorem PNP_not_forall_exists: forall S, forall P: S -> Prop, 
-      (forall P: Prop, P \/ ~P) -> 
-          ( ~(forall x: S, P x) -> (exists x: S, ~P x) ).
+      ~(forall x: S, P x) -> (exists x: S, ~P x).
 Proof.
   intros.
   apply: DNE.
@@ -27,6 +27,7 @@ Proof.
   }
 Qed.
 
+
 Lemma PNP P : P \/ ~P.
 
 have X:= @DNE P.
@@ -35,8 +36,16 @@ rewrite /not.
 move=> H. apply: (H).
 right=> p.
 apply: H. left. done.
-
 Qed.
+
+
+
+Lemma inhabited_exists A :
+  (exists x : A, True) <-> inhabited A.
+Proof.
+by split; case.
+Qed.
+
 
 
 
@@ -52,7 +61,7 @@ Proof.
   - exists x. done.
   - apply PNP_not_forall_exists in O.
     + destruct O. exists x0. done.
-    + done.
+
 
 Restart.
 
@@ -63,6 +72,16 @@ Restart.
   move=> H y.
   case: (PNP (P y)) => //.
   move=> ?. exfalso.  apply C. exists y. done.
+
+Restart.
+
+apply: DNE => not_DP. apply/not_DP.  move=> [p].
+exists p=> _ y.
+
+apply: DNE => nPy. apply/nPy.
+case: not_DP.
+by exists y => /nPy.
+
 
 Qed.
 
