@@ -2,18 +2,74 @@ From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat div.
 Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
-From Hammer Require Import Hammer.
+From Hammer Require Import Hammer Reconstr.
+
 
 Section Classical_reasoning.
 
 (** We assert the classical principle of double negation elimination *)
 Variable DNE : forall A : Prop, ~ ~ A -> A.
 
-(* https://en.wikipedia.org/wiki/Drinker_paradox *)
-Lemma drinker_paradox (P : nat -> Prop) :
-  exists x, P x -> forall y, P y.
+
+
+Theorem PNP_not_forall_exists: forall S, forall P: S -> Prop, 
+      (forall P: Prop, P \/ ~P) -> 
+          ( ~(forall x: S, P x) -> (exists x: S, ~P x) ).
 Proof.
-Admitted.
+  intros.
+  apply: DNE.
+
+  move=> H1.
+  suff: forall x: S, P x. done.
+  { move=> x. apply: DNE.
+    move=> H2. 
+    have: exists x : S, ~ P x by by exists x. done.
+  }
+Qed.
+
+Lemma PNP P : P \/ ~P.
+
+have X:= @DNE P.
+apply: DNE.
+rewrite /not.
+move=> H. apply: (H).
+right=> p.
+apply: H. left. done.
+
+Qed.
+
+
+
+(* https://en.wikipedia.org/wiki/Drinker_paradox *)
+Lemma drinker_paradox {T} (P : T -> Prop) :
+  inhabited T -> exists x, P x -> forall y, P y.
+Proof.
+
+  have pnp:= PNP.
+  move: (PNP (forall y, P y)) => H.
+  move=> [x].
+  case H => O.
+  - exists x. done.
+  - apply PNP_not_forall_exists in O.
+    + destruct O. exists x0. done.
+    + done.
+
+Restart.
+
+  move=> Ex.
+  case: (PNP (exists z, ~ P z)) => C.
+  -  case: C => x. exists x. done.
+  case: Ex => x. exists x.
+  move=> H y.
+  case: (PNP (P y)) => //.
+  move=> ?. exfalso.  apply C. exists y. done.
+
+Qed.
+
+
+
+
+
 
 (* This closes the section, discharging over DNE *)
 End Classical_reasoning.
@@ -47,6 +103,8 @@ by case Eq: (p1==p2).
   *** Restart.
 done.
 Qed.
+
+
 
 
 
