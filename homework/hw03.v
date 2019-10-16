@@ -86,7 +86,30 @@ by exists y => /nPy.
 Qed.
 
 
+Lemma drinker_paradox' (P : nat -> Prop) :
+  exists x, P x -> forall y, P y.
 
+apply: DNE => not_DP; apply/not_DP.
+exists 0=> _ y.
+apply: DNE => nPy. apply/nPy. 
+case: not_DP.
+ exists y. done. 
+
+Restart.
+
+have NAAA: forall A: Prop, (~A -> A) -> A. scrush.
+
+apply: (NAAA) => not_DP.
+(* apply: DNE => not_DP; apply/not_DP. *)
+exists 0=> _ y.
+
+apply: NAAA => nPy.
+(* apply: DNE => nPy. apply/nPy.  *)
+case: not_DP.
+ exists y. done. 
+
+
+Qed.
 
 
 
