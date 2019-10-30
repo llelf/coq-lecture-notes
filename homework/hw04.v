@@ -11,11 +11,6 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-From Hammer Require Import Hammer Reconstr.
-From QuickChick Require Import QuickChick.
-Set Bullet Behavior "None".
-
-
 Fixpoint sum (l : seq nat) : nat :=
   if l is (x :: xs) then x + sum xs
   else 0.
@@ -81,7 +76,6 @@ Fixpoint map_iter' {A B}
   else rev acc.
 
 Definition map_iter {A B} (f : A -> B) l := map_iter' f l [::].
-
 
 Lemma map_iter'_correct A B (f : A -> B) l1 l2 :
   map_iter' f l1 l2 = rev l2 ++ (map f l1).

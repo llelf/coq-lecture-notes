@@ -2,8 +2,6 @@ From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat div.
 Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
-From Hammer Require Import Hammer Reconstr.
-Require Import Utf8.
 
 
 Section Classical_reasoning.
@@ -11,111 +9,10 @@ Section Classical_reasoning.
 (** We assert the classical principle of double negation elimination *)
 Variable DNE : forall A : Prop, ~ ~ A -> A.
 
-
-
-Theorem PNP_not_forall_exists: forall S, forall P: S -> Prop, 
-      ~(forall x: S, P x) -> (exists x: S, ~P x).
-Proof.
-  intros.
-  apply: DNE.
-
-  move=> H1.
-  suff: forall x: S, P x. done.
-  { move=> x. apply: DNE.
-    move=> H2. 
-    have: exists x : S, ~ P x by by exists x. done.
-  }
-Qed.
-
-
-Lemma PNP P : P \/ ~P.
-
-have X:= @DNE P.
-apply: DNE.
-rewrite /not.
-move=> H. apply: (H).
-right=> p.
-apply: H. left. done.
-Qed.
-
-
-
-Lemma inhabited_exists A :
-  (exists x : A, True) <-> inhabited A.
-Proof.
-by split; case.
-Qed.
-
-
-
-
 (* https://en.wikipedia.org/wiki/Drinker_paradox *)
-Lemma drinker_paradox {T} (P : T -> Prop) :
-  inhabited T -> exists x, P x -> forall y, P y.
-Proof.
-<<<<<<< HEAD
-
-  have pnp:= PNP.
-  move: (PNP (forall y, P y)) => H.
-  move=> [x].
-  case H => O.
-  - exists x. done.
-  - apply PNP_not_forall_exists in O.
-    + destruct O. exists x0. done.
-
-
-Restart.
-
-  move=> Ex.
-  case: (PNP (exists z, ~ P z)) => C.
-  -  case: C => x. exists x. done.
-  case: Ex => x. exists x.
-  move=> H y.
-  case: (PNP (P y)) => //.
-  move=> ?. exfalso.  apply C. exists y. done.
-
-Restart.
-
-apply: DNE => not_DP. apply/not_DP.  move=> [p].
-exists p=> _ y.
-
-apply: DNE => nPy. apply/nPy.
-case: not_DP.
-by exists y => /nPy.
-
-
-Qed.
-
-
-Lemma drinker_paradox' (P : nat -> Prop) :
+Lemma drinker_paradox (P : nat -> Prop) :
   exists x, P x -> forall y, P y.
-
-apply: DNE => not_DP; apply/not_DP.
-exists 0=> _ y.
-apply: DNE => nPy. apply/nPy. 
-case: not_DP.
- exists y. done. 
-
-Restart.
-
-have NAAA: forall A: Prop, (~A -> A) -> A. scrush.
-
-apply: (NAAA) => not_DP.
-(* apply: DNE => not_DP; apply/not_DP. *)
-exists 0=> _ y.
-
-apply: NAAA => nPy.
-(* apply: DNE => nPy. apply/nPy.  *)
-case: not_DP.
- exists y. done. 
-
-
-Qed.
-
-
-||||||| merged common ancestors
-Admitted.
-=======
+Proof.
 apply: DNE => not_DP; apply/not_DP.
 exists 0=> _ y.
 apply: DNE => nPy; apply/nPy.
@@ -139,7 +36,6 @@ apply: DNE => nPy; apply/nPy.
 case: not_DP.
 by exists y => /nPy.
 Qed.
->>>>>>> origin/master
 
 (* This closes the section, discharging over DNE *)
 End Classical_reasoning.
@@ -152,61 +48,12 @@ Section Misc.
 Variables A B : Type.
 Implicit Types x y : A * B.
 
-
-
-Lemma pair_eqE (Aeq Beq: eqType) (p1 p2 : Aeq * Beq) :
-  (p1 == p2) = (p1.1 == p2.1) && (p1.2 == p2.2).
-Proof.
-case: p1 p2 => [a b] [c d] /=. apply/idP/idP.
-by move=>/eqP [] -> ->; rewrite !eqxx.
-by move=>/andP[] /eqP -> /eqP ->.
-
-  *** Restart.
-case Eq: (p1==p2).
-move/eqP: Eq.
-move->. symmetry. apply/andP. done. done.
-
-  *** Restart.
-by case Eq: (p1==p2).
-
-  *** Restart.
-done.
-Qed.
-
-
-
-
-
-
 Lemma prod_inj x y :
   x = y <-> (x.1, x.2) = (y.1, y.2).
-Proof.
-by case: x; case: y.
-  *** Restart.
-split; first by move->.
-case. case: x; case: y => ???? /= -> ->. done.
-Restart.
-
-by move: x y => [??] [??].
-Restart.
-by case x,y.
-Restart.
-by case: x; case: y.
-Qed.
-
-(* split=> [-> //|]. *)
-
+Proof. by case: x; case: y. Qed.
 
 End Misc.
 
-
-
-From QuickChick Require Import QuickChick.
-Require Import Lia.
-
-
-Definition divn_ltn_mono n m k := andb (andb (n < m) ((k %| m))) (~~ (k==0)) ==> (n %/ k < m %/ k).
-QuickChick divn_ltn_mono.
 
 
 Section Arithmetics.
@@ -308,28 +155,13 @@ Claim: every amount of postage that is at least 12 cents can be made
 (** Hint: no need to use induction here *)
 Lemma stamps n : 12 <= n -> exists s4 s5, s4 * 4 + s5 * 5 = n.
 Proof.
-exists (n %/ 4 - n %% 4), (n %% 4).
-rewrite mulnBl. 
-have X: n %/ 4 * 4 + n %% 4 = n by admit.
-
-rewrite -addnABC.
-rewrite -mulnBr /=. simpl. rewrite subSnn muln1. done.
-
-have: 3 <= n %/ 4. change (3 <= n%/4) with (12%/4 <= n %/ 4). by apply leq_div2r.
-
-admit.
-
-rewrite [_ * 5]mulnS. apply: leq_addl.
-
-Restart.
-
 move=> /leq_div2r leq12n; exists (n %/4 - n %% 4), (n %% 4).
 rewrite mulnBl -addnABC -?mulnBr ?muln1 ?leq_mul -?divn_eq //.
 by rewrite (leq_trans _ (leq12n 4)) // -ltnS ltn_pmod.
 Qed.
 
-
 End Arithmetics.
+
 
 (* ======================================== *)
 
