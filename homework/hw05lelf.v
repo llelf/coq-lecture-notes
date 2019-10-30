@@ -99,22 +99,16 @@ by rewrite -[s in RHS]revK foldl_rev.
 Qed.
 
 
-Lemma foldl_cat T R (f: R->T->R) z s1 s2 :
-  foldl f z (s1 ++ s2) = foldl f (foldl f z s1) s2.
+Lemma foldl_cat T R (f: R->T->R) z s1 s2 : foldl f z (s1 ++ s2) = foldl f (foldl f z s1) s2.
 Proof.
-
-
-
-rewrite -(revK (s1 ++ s2)).
- rewrite rev_cat. foldr_cat.
-by rewrite -(revK (s1 ++ s2)) foldl_rev rev_cat foldr_cat -!foldl_rev !revK.
+elim: s1 z => //=.
 Qed.
 
 
 
 
 Lemma foldl_via_foldr A B (f : B -> A -> B) :
-  (* flip (foldr (fun x rec => rec \o (flip f x)) id) =2 foldl f. *)
+  flip (foldr (fun x rec => rec \o (flip f x)) id) =2 foldl f.
   (* (flip \o foldr (fun x rec => rec \o (flip f x))) id =2 foldl f. *)
   (* forall x0,  *)
   (*   flip (foldr (fun x rec => rec \o (flip f x)) id) x0 =1 foldl f x0. *)
@@ -124,30 +118,13 @@ Lemma foldl_via_foldr A B (f : B -> A -> B) :
   (*   foldr (fun x rec => rec \o (f^~ x)) id s x0 = foldl f x0 s. *)
   (* forall x0 s,  *)
   (*   foldr (fun x rec => rec \o (f^~ x)) id s x0 = foldl f x0 s. *)
-  forall x0 s, 
-    foldr (fun x rec a => rec (f a x)) id s x0 = foldl f x0 s.
+  (* forall x0 s,  *)
+  (*   foldr (fun x rec a => rec (f a x)) id s x0 = foldl f x0 s. *)
 Proof.
-intros.
-rewrite -[s in LHS]revK. rewrite -foldl_rev. rewrite revK.
-
-rewrite -[s in RHS]revK. rewrite foldl_rev.
-
-
 move=> x0 s.
-(* rewrite/flip/comp/=. *)
-elim: s => //= a s I.
-rewrite -(foldr_fusion _ _ _ _ _ x0). 
-
-
-rewrite/foldl/foldr.
-
-
-
-
-
-
-(* rewrite -foldr_map. *)
-Admitted.
+rewrite /flip.
+elim: s x0 => //=.
+Qed.
 
 
 
