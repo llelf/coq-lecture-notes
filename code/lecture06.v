@@ -22,6 +22,8 @@ Lemma altP P b :
   reflect P b -> alt_spec P b b.
 Proof.
 by move=> Pb; case: b / Pb; constructor.
+Restart.
+move=> Pb. case: b / Pb. by constructor. by constructor.
 Qed.
 
 (** We'll see how to use [altP] later, but let's
@@ -33,7 +35,8 @@ Lemma sym T (x y : T) :
 Proof.
 move=> H.
 case: H.  (* Does not work *)
-case: y /.
+case: y /. Undo.
+move=> x_eq_y. case: _ /x_eq_y.
 done.
 Qed.
 
@@ -53,6 +56,7 @@ rewrite eq_sym.
 
 (* 2nd goal: propositional inequality *)
 case: eqP.
+(* TODO homework *)
 Undo.
 (* 2nd goal: boolean inequality *)
 case: (altP eqP).
@@ -77,7 +81,10 @@ Goal forall b c,
   ~~ b = b && c.
 Proof.
 move=> b c.
+apply/idP/idP. Undo.
 apply/negP/andP.
+- admit.
+case. move->.
 Abort.
 
 End BooleanReflection.
@@ -100,17 +107,18 @@ Unset Printing All.
 
 End ProductEquality.
 
-
 (* === Demo: keying on terms === *)
 
 
 From mathcomp Require Import bigop.
 Import Monoid.
-
+Print Law.
 (* keying on terms, as opposed to types *)
 Lemma bar m n p q r :
   m + (n + p * (q * r)) = m + n + p * q * r.
 Proof.
+rewrite !addnA !mulnA.
+Restart.
 rewrite !mulmA /=.
 done.
 Check mulmA.
