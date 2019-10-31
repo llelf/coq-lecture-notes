@@ -3,7 +3,7 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-From Hammer Require Import Hammer.
+From Hammer Require Import Hammer Reconstr.
 
 
 Section LeftPad.
@@ -63,9 +63,14 @@ Lemma suffix_spec c n s :
   forall i, i < size s -> nth (leftpad c n s) (n - size s + i) = nth s i.
 Proof.
 move=> i _.
-by rewrite nth_ncons addKn ifN // -leqNgt leq_addr.
+rewrite nth_ncons addKn ifN // -leqNgt leq_addr. Undo.
+rewrite nth_ncons addKn ifN // -ltnNge leq_addr.
+done.
 Qed.
 
+From mathcomp Require Import eqtype.
+From QuickChick Require Import Tactics.
+Require Import Lia.
 
 
 
@@ -106,6 +111,10 @@ From mathcomp Require Import eqtype.
 
 
 
+
+
+
+
 Definition nat_ind2'' (P : nat -> Prop) :
   P 0 ->
   P 1 ->
@@ -118,6 +127,7 @@ Definition nat_ind2'' (P : nat -> Prop) :
     | 1 => p1
     | 0 => p0
     end.
+
 
 
 
@@ -166,6 +176,7 @@ Proof.
 elim/nat_ind2': n => //= n I. exact: leqW.
 Qed.
 
+
 Lemma div2_correct n :
   div2 n = n./2.
 Proof.
@@ -182,6 +193,9 @@ Proof.
 Admitted.
 
 
+
+
+
 Fixpoint divn_my (n m : nat) {struct n} : nat :=
   if m is m'.+1 then
     if n - m' is d.+1 then
@@ -189,10 +203,103 @@ Fixpoint divn_my (n m : nat) {struct n} : nat :=
     else 0
   else 0.
 
+
+Lemma edivnP m d : edivn_spec m d (edivn m d).
+Proof.
+
+rewrite -{1}[m]/(0 * d + m) /edivn. case: d => //= d.
+elim: m {-2}m 0 (leqnn m) => [|n IHn] [|m] q //= le_mn.
+have le_m'n: m - d <= n by rewrite (leq_trans (leq_subr d m)).
+rewrite subn_if_gt. case: ltnP => [// | le_dm].
+by rewrite -{1}(subnKC le_dm) -addSn addnA -mulSnr; apply: IHn.
+Qed.
+
+
+
+
 Lemma divn_my_correct n m :
   divn_my n m = divn n m.
 Proof.
+
+case: m => [|m].
+by case: n.
+
+elim: n . done.
+move=> n H.
+
+rewrite/=.
+rewrite subn_if_gt.
+
+case: ltnP.
+
+rewrite -[n < m]/(n.+1 < m.+1).
+
+
+
+(* have T: n < m -> n.+1 < m.+1 by trivial. move/{T}. ???? *)
+(* apply: (n < m -> n.+1 < m.+1). *)
+(* replace (n < m) with (n.+1 < m.+1) by trivial. *)
+(* have X: n < m -> n.+1 < m.+1 by trivial. move/X{X}. *)
+(* Search _ (?x < ?y) (?x + ?p < ?y + ?p) in ssrnat. *)
+
+
+
+
+
 Admitted.
+
+
+
+
+
+
+
+
+(* done. done. done. *)
+
+(* move=> n I n' I'.  *)
+
+(* hammer. *)
+
+
+(* elim/lt_wf_ind: m n => m I n. *)
+
+(* apply: I. *)
+
+
+Print transitive.
+Print commutative.
+
+Section OperationProperties'.
+Variables S T R : Type.
+
+Section SopSisT'.
+(* Implicit Type op :  S -> S -> T. *)
+(* About op. *)
+
+Variable op: S->S->T.
+
+Definition commutative' := forall x y, op x y = op y x.
+End SopSisT'.
+End OperationProperties'.
+
+Section RelationProperties'.
+Variable T : Type.
+Variable R : rel T.
+Definition transitive' := forall y x z, R x y -> R y z -> R x z.
+End RelationProperties'.
+
+Lemma addnC' : commutative' addn. exact: addnC. Qed.
+
+Lemma leq_trans' : transitive' leq. exact: leq_trans. Qed.
+
+
+
+About leq_trans'.
+
+
+
+
 
 
 
@@ -205,7 +312,26 @@ Arguments fib n : simpl nomatch.
 Lemma fib3 n :
   fib (3*n).+1 = (fib n.+1)^3 + 3 * fib n.+1 * (fib n)^2 - (fib n)^3.
 Proof.
-Admitted.
+
+
+elim: n => // n.
+set fn := fib n.
+set fn1 := fib n.+1.
+move=> H.
+
+rewrite [fib n.+2]/=.
+rewrite mulnDr.
+(* rewrite -[3 * _ * _]mulnA. *)
+rewrite mulnDl.
+rewrite -/fn -/fn1.
+
+
+
+
+
+
+
+Check leq_div : forall x, _.
 
 End MoreInductionExercises.
 
