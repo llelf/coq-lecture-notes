@@ -54,10 +54,9 @@ Abort.
 (** How does folding back with [rewrite -eqE] work? *)
 About eqE.
 
-(* Check eqE. *)
-(* Print nat_eqMixin. *)
-(* Check Equality.class. *)
-(* done. *)
+Check eqE.
+Print nat_eqMixin.
+Check Equality.class.
 
 (**
 
