@@ -180,7 +180,8 @@ Qed.
 Lemma div2_correct n :
   div2 n = n./2.
 Proof.
-elim/nat_ind2': n => //= n I. exact: eq_S.
+elim/nat_ind2': n => //= n I. exact: eq_S. Restart.
+by elim/nat_ind2': n => //= n ->.
 Qed.
 
 
@@ -190,7 +191,22 @@ Lemma lt_wf_ind (P : nat -> Prop) :
   (forall m, (forall k : nat, (k < m) -> P k) -> P m) ->
   forall n, P n.
 Proof.
-Admitted.
+move=> step n.
+elim: n {1 3}n (leqnn n).
+- case=>//. move=>_. apply: step. done.
+- move=> n I k le_kSn. apply: step.
+  move=> j.
+  move/leq_trans.
+  move/(_ _ le_kSn).
+  apply: I.
+
+Restart.
+
+move=> step n.
+elim: n {-2}n (leqnn n) => [[_|//] | n IHn k le_kSn]; first by apply: step.
+by apply: step => ? /leq_trans - /(_ _ le_kSn) /IHn.
+
+Qed.
 
 
 
@@ -206,7 +222,6 @@ Fixpoint divn_my (n m : nat) {struct n} : nat :=
 
 Lemma edivnP m d : edivn_spec m d (edivn m d).
 Proof.
-
 rewrite -{1}[m]/(0 * d + m) /edivn. case: d => //= d.
 elim: m {-2}m 0 (leqnn m) => [|n IHn] [|m] q //= le_mn.
 have le_m'n: m - d <= n by rewrite (leq_trans (leq_subr d m)).
@@ -220,19 +235,28 @@ Qed.
 Lemma divn_my_correct n m :
   divn_my n m = divn n m.
 Proof.
+elim: n {-2}n (leqnn n) m => [|n IHn]; first by case=> // _; case.
+case=> [_ [] // | n' le_n'Sn [//| m /=]].
+case eq_sub: (n'.+1 - m) => [|d]; first by rewrite divn_small // -subn_eq0 subSS eq_sub.
+move: (congr1 predn eq_sub). move=> /= <-. rewrite subSKn.
+rewrite IHn ?(leq_trans (leq_subr m n')) //.
+rewrite -[in RHS](@subnK m.+1 n'.+1) -1?subn_gt0 ?eq_sub //.
+by rewrite addnC -{2}(mul1n m.+1) divnMDl.
 
-case: m => [|m].
-by case: n.
+Qed.
 
-elim: n . done.
-move=> n H.
+(* case: m => [|m]. *)
+(* by case: n. *)
 
-rewrite/=.
-rewrite subn_if_gt.
+(* elim: n . done. *)
+(* move=> n H. *)
 
-case: ltnP.
+(* rewrite/=. *)
+(* rewrite subn_if_gt. *)
 
-rewrite -[n < m]/(n.+1 < m.+1).
+(* case: ltnP. *)
+
+(* rewrite -[n < m]/(n.+1 < m.+1). *)
 
 
 
@@ -243,28 +267,6 @@ rewrite -[n < m]/(n.+1 < m.+1).
 (* Search _ (?x < ?y) (?x + ?p < ?y + ?p) in ssrnat. *)
 
 
-
-
-
-Admitted.
-
-
-
-
-
-
-
-
-(* done. done. done. *)
-
-(* move=> n I n' I'.  *)
-
-(* hammer. *)
-
-
-(* elim/lt_wf_ind: m n => m I n. *)
-
-(* apply: I. *)
 
 
 Print transitive.
