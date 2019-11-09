@@ -95,6 +95,19 @@ Lemma expn_eq0 m e : (m ^ e == 0) = (m == 0) && (e > 0).
 Proof.
 elim: e => [|e I]; first by case: m.
 by rewrite expnS ltn0Sn andbT muln_eq0 {}I andbC andKb.
+Restart.
+
+case: (@eqP nat_eqType m 0).
+    - move=> H. rewrite -> H. case: e=> //=. move=> n. rewrite -> exp0n => //.
+    - move=> H. case: e.
+      + rewrite expn0.
+
+
+
+rewrite -[Equality.op (Equality.class nat_eqType)]/eqn.
+
+exact: erefl.
+
 Qed.
 
 
