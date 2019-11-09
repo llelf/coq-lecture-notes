@@ -33,6 +33,7 @@ Print ex.
     | ex_intro : forall x:A, P x -> ex P.
  *)
 
+
 (** simple definition relying on the existing [pred] function *)
 Definition predecessor (x : {n | 0 < n}) : nat :=
   let: (exist m prf_m_gt_0) := x in
@@ -138,8 +139,11 @@ Section PosSubtype.
 
 Inductive pos := Positive m of 0 < m.
 
-Coercion nat_of_pos p :=
+Coercion nat_of_pos (p:pos) :=
+  (* let: (n ,_) := p in n. *)
   let: Positive n _ := p in n.
+(* Coercion nat_of_pos' p := *)
+(*   let: Positive _ n := p in n. *)
 
 Variables p1 p2 : pos.
 
@@ -176,6 +180,10 @@ Check p1 == p2.
 
 End PosSubtype.
 
+
+Print false.
+
+Check notF : _->False.
 
 (** * Some standard [subType]s *)
 
@@ -232,6 +240,10 @@ Compute thead t.  (** = 5 *)
 (** [thead] of empty tuple
     does not even typecheck *)
 Fail Check thead [tuple].
+
+Record tuple_of_ (n : nat) (T : Type) : Type := Tuple
+  { tval :> seq T;  _ : is_true (size tval == n) }
+.
 
 (**
   Structure tuple_of (n : nat) (T : Type) : Type :=
@@ -422,7 +434,7 @@ Variable T : finType.
 
 (** Cardinality of a finite type *)
 Check #| T |.
-
+(* Unset Printing Notations. *)
 (** "bounded" quantification *)
 Check [forall x : T, x == x] && false.
 Fail Check (forall x : T, x == x) && false.
